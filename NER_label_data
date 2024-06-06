@@ -1,0 +1,28 @@
+def label_text_ignore_case(text, name):
+    # Split the text into words
+    words = text.split()
+    
+    # Split the name into parts and convert to lowercase
+    name_parts = name.lower().split()
+    
+    # Initialize an empty list to store the labels
+    labels = []
+    
+    # Iterate over the words in the text
+    i = 0
+    while i < len(words):
+        # Convert the current word and the next words to lowercase and check if they match the name parts
+        if [word.lower() for word in words[i:i+len(name_parts)]] == name_parts:
+            # Label the name parts as 1
+            labels.extend([1] * len(name_parts))
+            i += len(name_parts)
+        else:
+            # Label everything else as 0
+            labels.append(0)
+            i += 1
+    
+    return list(zip(words, labels))
+
+# Example usage
+text = "John Doe went to the market. john met with Jane doe."
+name = "John doe "
