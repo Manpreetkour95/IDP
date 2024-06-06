@@ -1,28 +1,32 @@
-def label_text_ignore_case(text, name):
+import re
+
+def label_text_ignore_case_regex(text, name):
+    # Prepare the regex pattern for the name, escaping special characters and ignoring case
+    name_pattern = re.compile(re.escape(name.strip()), re.IGNORECASE)
+    
     # Split the text into words
     words = text.split()
     
-    # Split the name into parts and convert to lowercase
-    name_parts = name.lower().split()
-    
     # Initialize an empty list to store the labels
-    labels = []
+    labels = [0] * len(words)
     
-    # Iterate over the words in the text
-    i = 0
-    while i < len(words):
-        # Convert the current word and the next words to lowercase and check if they match the name parts
-        if [word.lower() for word in words[i:i+len(name_parts)]] == name_parts:
-            # Label the name parts as 1
-            labels.extend([1] * len(name_parts))
-            i += len(name_parts)
-        else:
-            # Label everything else as 0
-            labels.append(0)
-            i += 1
+    # Find all matches of the name pattern in the text
+    matches = list(name_pattern.finditer(text))
+    
+    # Iterate over the matches and update the labels
+    for match in matches:
+        # Determine the start and end positions of the match in words
+        start_pos = len(text[:match.start()].split())
+        name_length = len(name.split())
+        for i in range(start_pos, start_pos + name_length):
+            if i < len(labels):
+                labels[i] = 1
     
     return list(zip(words, labels))
 
 # Example usage
 text = "John Doe went to the market. john met with Jane doe."
-name = "John doe "
+name = "John doe"
+
+labeled_text = label_text_ignore_case_regex(text, name)
+print(labeled_text)
