@@ -1,8 +1,6 @@
-import re
-
 def label_text_ignore_case_regex(text, name):
     # Prepare the regex pattern for the name, escaping special characters and ignoring case
-    name_pattern = re.compile(re.escape(name.strip()), re.IGNORECASE)
+    name_pattern = re.compile(r'\b' + re.escape(name.strip()) + r'\b', re.IGNORECASE)
     
     # Split the text into words
     words = text.split()
@@ -23,10 +21,50 @@ def label_text_ignore_case_regex(text, name):
                 labels[i] = 1
     
     return list(zip(words, labels))
-
 # Example usage
 text = "John Doe went to the market. john met with Jane doe."
-name = "John doe"
+name = "John Doe"
 
 labeled_text = label_text_ignore_case_regex(text, name)
 print(labeled_text)
+def test_label_text_ignore_case_regex():
+    # Test case 1: Exact match
+    text1 = "John Doe went to the market. John met with Jane Doe."
+    name1 = "John Doe"
+    expected_output1 = [('John', 1), ('Doe', 1), ('went', 0), ('to', 0), ('the', 0), ('market.', 0), ('John', 0), ('met', 0), ('with', 0), ('Jane', 0), ('Doe.', 0)]
+    assert label_text_ignore_case_regex(text1, name1) == expected_output1
+
+    # Test case 2: Case insensitive match
+    text2 = "john doe went to the market. John met with jane doe."
+    name2 = "John Doe"
+    expected_output2 = [('john', 1), ('doe', 1), ('went', 0), ('to', 0), ('the', 0), ('market.', 0), ('John', 0), ('met', 0), ('with', 0), ('jane', 0), ('doe.', 0)]
+    assert label_text_ignore_case_regex(text2, name2) == expected_output2
+
+    # Test case 3: No match
+    text3 = "Alice went to the market. Bob met with Carol."
+    name3 = "John Doe"
+    expected_output3 = [('Alice', 0), ('went', 0), ('to', 0), ('the', 0), ('market.', 0), ('Bob', 0), ('met', 0), ('with', 0), ('Carol.', 0)]
+    assert label_text_ignore_case_regex(text3, name3) == expected_output3
+
+    # Test case 4: Partial match should not label
+    text4 = "John went to the market. Doe met with Jane."
+    name4 = "John Doe"
+    expected_output4 = [('John', 0), ('went', 0), ('to', 0), ('the', 0), ('market.', 0), ('Doe', 0), ('met', 0), ('with', 0), ('Jane.', 0)]
+    assert label_text_ignore_case_regex(text4, name4) == expected_output4
+
+    # Test case 5: Name with special characters
+    text5 = "Dr. John Doe went to the market. John met with Jane Doe."
+    name5 = "John Doe"
+    expected_output5 = [('Dr.', 0), ('John', 1), ('Doe', 1), ('went', 0), ('to', 0), ('the', 0), ('market.', 0), ('John', 0), ('met', 0), ('with', 0), ('Jane', 0), ('Doe.', 0)]
+    assert label_text_ignore_case_regex(text5, name5) == expected_output5
+
+    # Test case 6: Name at the end of the sentence
+    text6 = "John met with Jane Doe. John Doe"
+    name6 = "John Doe"
+    expected_output6 = [('John', 0), ('met', 0), ('with', 0), ('Jane', 0), ('Doe.', 0), ('John', 1), ('Doe', 1)]
+    assert label_text_ignore_case_regex(text6, name6) == expected_output6
+
+    print("All test cases passed!")
+
+# Run the tests
+test_label_text_ignore_case_regex()
